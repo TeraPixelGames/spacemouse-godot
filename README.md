@@ -57,9 +57,16 @@ scons platform=linux target=template_release arch=x86_64
   - **Print last report (hex)** and **Log current state** for debugging
 - The overlay (top-right) shows translation/rotation values, button indices, and last raw report.
 - Camera moves while the plugin is enabled and the device is connected:
-  - Translation/rotation scales: `trans_scale = 0.0008`, `rot_scale = 0.0006`
-  - Damping: `0.85`
+- Translation/rotation scales (defaults): `translation_scale = 1.0`, `rotation_scale = 0.01`
+- Damping: `0.8`
 - Raw report logging is tied to the debug overlay toggle.
+- Editor Settings (per-user, under `Editor Settings > spacemouse/`):
+  - `translation_scale`: adjusts pan/zoom speed.
+  - `rotation_scale`: adjusts yaw/pitch/roll speed.
+  - `damping`: smoothing factor (lower = snappier).
+  - `show_debug_overlay`: toggle the bottom-panel SpaceMouse debug readout.
+  - `camera_speed_scale`: multiplies all motion/rotation speeds.
+  - `zoom_deadzone`: ignore small zoom input (reduces jitter in ortho views).
 
 ## Troubleshooting
 - **No motion / no device found**
