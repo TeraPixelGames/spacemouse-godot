@@ -111,6 +111,11 @@ def package_action(target, source, env):
         # Editor plugin (lives at project root)
         zf.write(project_root / "addons" / "spacemouse_editor" / "plugin.cfg", "addons/spacemouse_editor/plugin.cfg")
         zf.write(project_root / "addons" / "spacemouse_editor" / "spacemouse_editor.gd", "addons/spacemouse_editor/spacemouse_editor.gd")
+        # Docs inside addon folder
+        if (project_root / "README_SPACEMOUSE.md").exists():
+            zf.write(project_root / "README_SPACEMOUSE.md", "addons/spacemouse_editor/README_SPACEMOUSE.md")
+        if (project_root / "LICENSE").exists():
+            zf.write(project_root / "LICENSE", "addons/spacemouse_editor/LICENSE")
 
 
 package = env.Command(target=str(package_path), source=[lib], action=package_action)
