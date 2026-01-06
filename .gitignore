@@ -17,6 +17,9 @@ mono_crash.*.json
 spacemouse_native/bin/
 spacemouse_native/dist/
 spacemouse_native/.sconsign.dblite
+addons/spacemouse_native/bin/
+addons/spacemouse_native/dist/
+addons/spacemouse_native/.sconsign.dblite
 *.dll
 *.lib
 *.exp

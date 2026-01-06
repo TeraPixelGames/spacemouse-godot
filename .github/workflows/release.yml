@@ -40,13 +40,13 @@ jobs:
 
       - name: Build GDExtension
         run: python -m SCons platform=${{ matrix.platform }} target=template_release arch=x86_64 package
-        working-directory: spacemouse_native
+        working-directory: addons/spacemouse_native
 
       - name: Upload dist artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist-${{ matrix.platform }}
-          path: spacemouse_native/dist/*.zip
+          path: addons/spacemouse_native/dist/*.zip
 
   release:
     name: Publish Release

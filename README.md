@@ -3,7 +3,7 @@
 This plugin adds 3Dconnexion SpaceMouse 6DoF navigation to the Godot 4.x editor (3D viewport only). It ships with a GDExtension that reads the HID device via HIDAPI and an editor plugin that moves the editor camera while showing a debug overlay.
 
 ## Repo Layout
-- `spacemouse_native/` – GDExtension source + build scripts
+- `addons/spacemouse_native/` – GDExtension source + build scripts
   - `spacemouse_native.gdextension` – engine manifest (points to `bin/<platform>/...`)
   - `src/` – `SpaceMouseDevice` implementation and type registration
   - `thirdparty/hidapi/` – vendored HIDAPI snapshot (cloned from https://github.com/libusb/hidapi)
@@ -14,16 +14,16 @@ This plugin adds 3Dconnexion SpaceMouse 6DoF navigation to the Godot 4.x editor 
 ## Prerequisites
 - Godot 4.2+ editor
 - SCons (for building the native library)
-- `godot-cpp` (tag `godot-4.5-stable`) is pulled as a submodule into `spacemouse_native/thirdparty/godot-cpp`.
+- `godot-cpp` (tag `godot-4.5-stable`) is pulled as a submodule into `addons/spacemouse_native/thirdparty/godot-cpp`.
   - If missing, `SConstruct` auto-clones tag `godot-4.5-stable` from GitHub.
   - Build `godot-cpp` with matching `platform`, `arch`, and `target` (e.g. `scons platform=windows target=template_debug` inside `thirdparty/godot-cpp`).
 
 ## Build: Native Library
-Outputs land in `spacemouse_native/bin/<platform>/`.
+Outputs land in `addons/spacemouse_native/bin/<platform>/`.
 
 ### Windows (MSVC, x64)
 ```powershell
-cd spacemouse_native
+cd addons/spacemouse_native
 scons platform=windows target=template_debug arch=x86_64
 scons platform=windows target=template_release arch=x86_64
 ```
@@ -32,7 +32,7 @@ scons platform=windows target=template_release arch=x86_64
 
 ### Linux (GCC/Clang, x64)
 ```bash
-cd spacemouse_native
+cd addons/spacemouse_native
 scons platform=linux target=template_debug arch=x86_64
 scons platform=linux target=template_release arch=x86_64
 ```
@@ -41,12 +41,12 @@ scons platform=linux target=template_release arch=x86_64
 
 ### Notes
 - HIDAPI is vendored; no extra install needed.
-- If you prefer a submodule, replace the folder with `git submodule add https://github.com/libusb/hidapi thirdparty/hidapi`.
+- If you prefer a submodule, replace the folder with `git submodule add https://github.com/libusb/hidapi addons/spacemouse_native/thirdparty/hidapi`.
 - If you add macOS later, extend `SConstruct` with `thirdparty/hidapi/mac/hid.c` and update the `.gdextension`.
 
 ## Install & Enable in Godot
-1. Copy repo (or `addons/spacemouse_editor` and `spacemouse_native` with built binaries) into your project.
-2. Ensure binaries match your editor platform/arch and are at the paths in `spacemouse_native/spacemouse_native.gdextension`.
+1. Copy the repo (or just `addons/spacemouse_editor` plus `addons/spacemouse_native` with built binaries) into your project.
+2. Ensure binaries match your editor platform/arch and are at the paths in `addons/spacemouse_native/spacemouse_native.gdextension`.
 3. In Godot: `Project > Project Settings > Plugins` → enable **SpaceMouse Editor**.
 4. If the native library is missing, the plugin will warn and stay idle.
 

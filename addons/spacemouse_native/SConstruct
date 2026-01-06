@@ -9,7 +9,8 @@ target = ARGUMENTS.get("target", "template_debug")
 arch = ARGUMENTS.get("arch", "x86_64")
 
 root_dir = Path(Dir(".").abspath)
-project_root = root_dir.parent
+addons_root = root_dir.parent
+repo_root = addons_root.parent
 godot_cpp_path = (root_dir / "thirdparty" / "godot-cpp").resolve()
 
 if not godot_cpp_path.exists():
@@ -105,17 +106,17 @@ def package_action(target, source, env):
 
     with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         # GDExtension manifest
-        zf.write(root_dir / "spacemouse_native.gdextension", "spacemouse_native/spacemouse_native.gdextension")
+        zf.write(root_dir / "spacemouse_native.gdextension", "addons/spacemouse_native/spacemouse_native.gdextension")
         # Platform binary for the current build
-        zf.write(root_dir / binary_path, f"spacemouse_native/bin/{platform}/{binary_name}")
+        zf.write(root_dir / binary_path, f"addons/spacemouse_native/bin/{platform}/{binary_name}")
         # Editor plugin (lives at project root)
-        zf.write(project_root / "addons" / "spacemouse_editor" / "plugin.cfg", "addons/spacemouse_editor/plugin.cfg")
-        zf.write(project_root / "addons" / "spacemouse_editor" / "spacemouse_editor.gd", "addons/spacemouse_editor/spacemouse_editor.gd")
+        zf.write(addons_root / "spacemouse_editor" / "plugin.cfg", "addons/spacemouse_editor/plugin.cfg")
+        zf.write(addons_root / "spacemouse_editor" / "spacemouse_editor.gd", "addons/spacemouse_editor/spacemouse_editor.gd")
         # Docs inside addon folder
-        if (project_root / "README.md").exists():
-            zf.write(project_root / "README.md", "addons/spacemouse_editor/README_SPACEMOUSE.md")
-        if (project_root / "LICENSE").exists():
-            zf.write(project_root / "LICENSE", "addons/spacemouse_editor/LICENSE")
+        if (repo_root / "README.md").exists():
+            zf.write(repo_root / "README.md", "addons/spacemouse_editor/README_SPACEMOUSE.md")
+        if (repo_root / "LICENSE").exists():
+            zf.write(repo_root / "LICENSE", "addons/spacemouse_editor/LICENSE")
 
 
 package = env.Command(target=str(package_path), source=[lib], action=package_action)

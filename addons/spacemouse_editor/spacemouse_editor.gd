@@ -30,7 +30,7 @@ var _debug_label: RichTextLabel
 var _update_timer: Timer
 var _last_update_ms := 0
 var _editor_settings: EditorSettings
-const _GDEXT_PATH := "res://spacemouse_native/spacemouse_native.gdextension"
+const _GDEXT_PATH := "res://addons/spacemouse_native/spacemouse_native.gdextension"
 const SETTINGS_PREFIX := "spacemouse/"
 const SETTING_TRANS := SETTINGS_PREFIX + "translation_scale"
 const SETTING_ROT := SETTINGS_PREFIX + "rotation_scale"
