@@ -1,0 +1,4 @@
+[submodule "spacemouse_native/thirdparty/godot-cpp"]
+	path = spacemouse_native/thirdparty/godot-cpp
+	url = https://github.com/godotengine/godot-cpp.git
+	branch = 4.5-stable

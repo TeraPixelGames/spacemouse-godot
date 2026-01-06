@@ -1,0 +1,11 @@
+spacemouse_native/bin/
+spacemouse_native/dist/
+spacemouse_native/.sconsign.dblite
+*.dll
+*.lib
+*.exp
+*.pdb
+*.obj
+*.o
+*.so
+*.a

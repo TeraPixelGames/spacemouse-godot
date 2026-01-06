@@ -1,0 +1,118 @@
+import os
+import subprocess
+from pathlib import Path
+
+env = Environment()
+
+platform = ARGUMENTS.get("platform", "windows")
+target = ARGUMENTS.get("target", "template_debug")
+arch = ARGUMENTS.get("arch", "x86_64")
+
+root_dir = Path(Dir(".").abspath)
+project_root = root_dir.parent
+godot_cpp_path = (root_dir / "thirdparty" / "godot-cpp").resolve()
+
+if not godot_cpp_path.exists():
+    print(f"[spacemouse] godot-cpp not found at {godot_cpp_path}, cloning tag godot-4.5-stable...")
+    clone_cmd = [
+        "git",
+        "clone",
+        "--depth",
+        "1",
+        "--branch",
+        "godot-4.5-stable",
+        "https://github.com/godotengine/godot-cpp.git",
+        str(godot_cpp_path),
+    ]
+    subprocess.check_call(clone_cmd)
+
+godot_cpp_path = str(godot_cpp_path)
+godot_cpp_gen_include = Path(godot_cpp_path) / "gen" / "include"
+godot_cpp_header = godot_cpp_gen_include / "godot_cpp" / "classes" / "global_constants.hpp"
+
+if not godot_cpp_header.exists():
+    print(f"[spacemouse] godot-cpp headers not found ({godot_cpp_header}), running scons in godot-cpp...")
+    subprocess.check_call(
+        [
+            "scons",
+            f"platform={platform}",
+            f"target={target}",
+            f"arch={arch}",
+        ],
+        cwd=godot_cpp_path,
+    )
+
+env.Append(CPPPATH=[
+    f"{godot_cpp_path}/include",
+    f"{godot_cpp_path}/include/godot_cpp",
+    f"{godot_cpp_path}/gdextension",
+    str(godot_cpp_gen_include),
+    str(godot_cpp_gen_include / "godot_cpp"),
+    "src",
+    "thirdparty/hidapi",
+    "thirdparty/hidapi/hidapi",
+])
+
+env.Append(LIBPATH=[f"{godot_cpp_path}/bin"])
+env.Append(CPPDEFINES=["TYPED_METHOD_BIND"])
+
+if platform == "windows":
+    env.Append(CXXFLAGS=["/std:c++17"])
+else:
+    env.Append(CCFLAGS=["-std=c++17"])
+
+if platform == "windows":
+    libname = f"libgodot-cpp.{platform}.{target}.{arch}"
+else:
+    libname = f"godot-cpp.{platform}.{target}.{arch}"
+if platform == "windows":
+    env.Append(LIBS=[libname])
+    hid_sources = ["thirdparty/hidapi/windows/hid.c"]
+    env.Append(CCFLAGS=["-D_CRT_SECURE_NO_WARNINGS", "-DWIN32_LEAN_AND_MEAN"])
+    env.Append(LIBS=["setupapi", "cfgmgr32"])
+elif platform == "linux":
+    env.Append(LIBS=[libname])
+    hid_sources = ["thirdparty/hidapi/linux/hid.c"]
+    env.Append(LIBS=["udev", "pthread"])
+else:
+    print(f"Unsupported platform '{platform}'")
+    Exit(1)
+
+sources = ["src/register_types.cpp", "src/spacemouse_device.cpp"] + hid_sources
+
+output_dir = Path("bin") / platform
+os.makedirs(output_dir, exist_ok=True)
+
+if platform == "windows":
+    binary_name = "spacemouse_native.dll"
+else:
+    binary_name = "libspacemouse_native.so"
+
+lib = env.SharedLibrary(target=str(output_dir / "spacemouse_native"), source=sources)
+
+# Build a drop-in zip containing only the runtime artifacts needed in a Godot project.
+dist_dir = Path("dist")
+package_name = f"spacemouse-godot-{platform}-{target}-{arch}.zip"
+package_path = dist_dir / package_name
+binary_path = output_dir / binary_name
+
+
+def package_action(target, source, env):
+    import zipfile
+
+    zip_path = Path(str(target[0]))
+    zip_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        # GDExtension manifest
+        zf.write(root_dir / "spacemouse_native.gdextension", "spacemouse_native/spacemouse_native.gdextension")
+        # Platform binary for the current build
+        zf.write(root_dir / binary_path, f"spacemouse_native/bin/{platform}/{binary_name}")
+        # Editor plugin (lives at project root)
+        zf.write(project_root / "addons" / "spacemouse_editor" / "plugin.cfg", "addons/spacemouse_editor/plugin.cfg")
+        zf.write(project_root / "addons" / "spacemouse_editor" / "spacemouse_editor.gd", "addons/spacemouse_editor/spacemouse_editor.gd")
+
+
+package = env.Command(target=str(package_path), source=[lib], action=package_action)
+env.AlwaysBuild(package)
+env.Alias("package", package)
